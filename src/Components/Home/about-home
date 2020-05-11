@@ -1,0 +1,13 @@
+- first we validate the access token with the help of backend api.
+- if the access token is valid then fetch the user details from the api.
+- to fetch the user details , we need to call another api.
+
+- to go to the login screen again "click on login via another account"
+
+
+/**
+Future Planning
+**/
+
+1) In future , once the person login , save its details from the login response in redux store.
+2) fetch the data from redux , if data is not there is redux , only then call the api of fetching the user required.

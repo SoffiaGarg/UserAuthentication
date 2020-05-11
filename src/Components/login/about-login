@@ -1,0 +1,6 @@
+- if user click on submit button without email or password , give error in popup.
+- if email is not registered then display error in popup.
+- once successfull login , save the token in cookies for future authorization.
+
+- before rendeting , checks if the access token is alreday present , if yes , validate the access token.
+- if access token is valid then directly redirect to the home page.

@@ -1,0 +1,3 @@
+- if email , password and name is missing show error in popup.
+- once the registration done , user can click on login link.
+- user cannot registered with the exixting emails.
