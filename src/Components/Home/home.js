@@ -3,6 +3,7 @@ import '../../assets/styles.css';
 import Title from '../Basic-Components/title';
 import Button from '../Basic-Components/button';
 import { getAccessToken, validateAccessToken, deleteAccessToken } from '../../Utils/universal';
+import {API_ROUTE} from '../../Config/config';
 
 /**
  * ------------------------------------------------------------------------------------------------------------
@@ -16,7 +17,9 @@ import { getAccessToken, validateAccessToken, deleteAccessToken } from '../../Ut
 class Home extends Component {
     state = {
         name: null,
-        email: null
+        email: null,
+        loading:true,
+        waiting:false
     }
 
     onClickHandler = () => {
@@ -32,8 +35,11 @@ class Home extends Component {
                 pathname: './'
             })
         } else {
+            this.setState({
+                waiting:true
+            })
             let token = getAccessToken();
-            let url = "http://localhost:3000/";
+            let url = API_ROUTE.GET_USER;
             let userData = await fetch(url, {
                 method: 'get',
                 headers: {
@@ -42,20 +48,25 @@ class Home extends Component {
                 },
             })
             let result = await userData.json();
-            console.log("resul===", result);
             if (result && result.status === 200 && result.data) {
                 this.setState({
                     name: result.data.name,
-                    email: result.data.email
+                    email: result.data.email,
+                    loading:false
                 })
             }
         }
 
     }
     render() {
+        let loadingData= null;
+        if(this.state.waiting && this.state.loading){
+            loadingData = <div style = {{"marginLeft":"10px"}}><center><h3>... LOADING, PLEASE WAIT</h3></center></div>
+        }
         return (
             <div>
                 <Title name="User Dashboard" />
+                {loadingData}
                 <h4>Welcome {this.state.name}</h4>
                 <h5>You are successfully login with email id {this.state.email}</h5>
                 <br />

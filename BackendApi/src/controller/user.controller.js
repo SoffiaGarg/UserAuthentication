@@ -1,5 +1,6 @@
-import {loginBL, registerBL,getUserBL,verifyToken} from '../businessLogic/user.BL';
-
+import {loginBL, registerBL,getUserBL,verifyToken} from '../BusinessLogic/user.BL';
+import {logger} from '../Utils/logger';
+import { SuccessMsg, ErrorMsg } from '../Utils/message';
 /**
  * ....................................................................................
  * Login Controller
@@ -9,10 +10,11 @@ import {loginBL, registerBL,getUserBL,verifyToken} from '../businessLogic/user.B
  * status(200) - for successfull response.
  * 
  */
-export const login = (req,res)=>{
+export const login = async(req,res)=>{
      try{
-      let result = loginBL(req.body);
-       res.send(result);
+      let result = await loginBL(req.body);
+      logger.info("login successfull");
+      res.send(result);
      }catch(error){
          res.send({
              status:400,
@@ -29,9 +31,10 @@ export const login = (req,res)=>{
  * @param {*} req - name , email and password (for now , no validate on email and password)
  * @param {*} res - send status 200 for postive and 400 for negative response
  */
-export const register = (req,res)=>{
+export const register = async(req,res)=>{
     try{
-       let result = registerBL(req.body);
+       let result = await registerBL(req.body);
+       logger.info("Registered Successfully");
        res.send(result);
     }catch(error){
         res.send({
@@ -49,10 +52,10 @@ export const register = (req,res)=>{
  * @param {} req - Headers - AccessToken
  * @param {*} res 
  */
-export const getUser = (req,res)=>{
+export const getUser = async(req,res)=>{
     try{
-        console.log(req.headers,"====");
-        let result = getUserBL(req.headers.authorization);
+        let result = await getUserBL(req.headers.authorization);
+        logger.info("User Details fetch successfully");
         res.send(result);
      }catch(error){
          res.send({
@@ -71,20 +74,21 @@ export const getUser = (req,res)=>{
  * @param  req - Headers (Authorization)
  * @param {*} res 
  */
-export const validateAccessToken = (req,res)=>{
+export const validateAccessToken = async(req,res)=>{
     try{
-        let result = verifyToken(req.headers.authorization);
-        console.log("my result==",result);
+        let result = await verifyToken(req.headers.authorization);
         if(result){
+            logger.info("Token Verified Successfully");
             res.send({
                 status:200,
-                message:'Token verified',
+                message:SuccessMsg.TOKEN_VERIFIED,
                 data:result
             }); 
         }else{
+            logger.warn("Token got Expired");
             res.send({
                 status:400,
-                message:'Token expired',
+                message:ErrorMsg.TOKEN_EXPIRED,
                 data:result
             }); 
         }
@@ -92,7 +96,7 @@ export const validateAccessToken = (req,res)=>{
     }catch(error){
         res.send({
             status:400,
-            message:"Token expired"
+            message:ErrorMsg.TOKEN_EXPIRED
         })
     }
 }

@@ -1,6 +1,7 @@
-import {userData} from '../../database/user-db'
 var jwt = require('jsonwebtoken');
-
+import User from '../Modal/user-modal';
+import { logger } from '../Utils/logger';
+import {SuccessMsg,ErrorMsg} from '../Utils/message';
 
 
 /**
@@ -14,12 +15,17 @@ var jwt = require('jsonwebtoken');
  *  - if email valid but password is incorrect , send the error message with status 400.
  *  - if email and password is correct , then create a access token for future authrization
  */
-export const loginBL = (payload)=>{
-   let userDetail = validateEmail(payload.email);
+export const loginBL = async(payload)=>{
+    if(!payload.email || !payload.password){
+        logger.warn("Some fields are missing in login API")
+        throw new Error(ErrorMsg.MISSING_FIELD);
+    }
+    //else
+   let userDetail = await validateEmail(payload.email);
    if(!userDetail){
        return {
            status:401,
-           message:"Email not found , please sign up first"
+           message: ErrorMsg.EMAIL_NOT_FOUND
        }
    }else{
        if(userDetail.password === payload.password){
@@ -31,7 +37,7 @@ export const loginBL = (payload)=>{
          updateAccessToken(userDetail.email,token);
            return {
                status:200,
-               message:"Login Successfull",
+               message:SuccessMsg.LOGIN_SUCCESS,
                data:{
                    token
                }
@@ -39,7 +45,7 @@ export const loginBL = (payload)=>{
        }else{
            return {
                status:400,
-               message:"Password is Incorrect"
+               message:ErrorMsg.WRONG_PASSWORD
            }
        }
    }
@@ -50,26 +56,31 @@ export const loginBL = (payload)=>{
  Register User
  ..................................................................................
  * @param {} payload 
-
+  - validate request has all the required data.
   - if email already exists send error.
   - otherwise registered user successfully.
  */
 
 
-export const registerBL = (payload)=>{
-    let userDetail = validateEmail(payload.email);
-   if(userDetail){
-       return{
-           status:400,
-           message:"Email Already Exists."
-       }
-   }else{
-       userData.push(payload);
-       return{
-           status:200,
-           message:"User Registered Successfully"
-       }
-   }
+export const registerBL = async(payload)=>{
+    if(payload.email && payload.password && payload.name){
+        let userDetail = await validateEmail(payload.email);
+        if(userDetail){
+            return{
+                status:400,
+                message:ErrorMsg.EMAIL_ALREADY_EXISTS
+            }
+        }else{
+           await User.add(payload);
+            return{
+                status:200,
+                message:SuccessMsg.REGISTER_SUCCESS
+            }
+        }
+    }else{
+        throw new Error(ErrorMsg.MISSING_FIELD)
+    }
+    
 }
 
 /**
@@ -80,21 +91,20 @@ export const registerBL = (payload)=>{
  * From access token , find the user data;
  * @param {} token 
  */
-export const getUserBL = (token)=>{
-    let isVerified = verifyToken(token);
+export const getUserBL = async(token)=>{
+    let isVerified = await verifyToken(token);
     if(!isVerified.data){
         return{
             status:400,
-            message:"Access Token Expired"
+            message:ErrorMsg.TOKEN_EXPIRED
         }
     }
     //if token is valid then get the user from the database
     else{
-        let userDetail= userData.find((user)=>{
-            if(user.token===token){
-                return user;
-            }
-         })
+        let userDetail = await User.get({
+            token
+        })
+
          if(userDetail){
              return{
                  status:200,
@@ -104,7 +114,7 @@ export const getUserBL = (token)=>{
          }else{
              return{
                  status:400,
-                 message:"Access Token Expired"
+                 message:ErrorMsg.TOKEN_EXPIRED
              }
          }
     }
@@ -119,17 +129,13 @@ export const getUserBL = (token)=>{
  * - verifyToken - check if token is valid or not.
  * 
  */
-const validateEmail = (email)=>{
-    let userDetail= userData.find((user)=>{
-       if(user.email===email){
-           return user;
-       }
-    })
+const validateEmail = async(email)=>{
+    let userDetail = await User.get({email});
     return userDetail;
 }
 
 
-export const verifyToken = (token)=>{
+export const verifyToken = async(token)=>{
     let result = jwt.verify(token, 'nodeReactApp',(err,res)=>{
         if(res){
             return res;
@@ -139,11 +145,12 @@ export const verifyToken = (token)=>{
 }
 
 //Update access token , after every successfull login
-const updateAccessToken = (email,token)=>{
-      userData.map((user)=>{
-        if(user.email === email){
-            user.token = token;
-            return user;
-        }else return user
+const updateAccessToken = async(email,token)=>{
+    await User.updateOne({
+        email,
+    },{
+        $set:{
+            token
+        }
     })
 }

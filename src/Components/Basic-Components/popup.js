@@ -13,7 +13,6 @@ class Popup extends Component {
       this.setState({
           display:"none"
       });
-      this.props.onClosePopup();
     }
 
     render() {

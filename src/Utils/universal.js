@@ -1,3 +1,5 @@
+import { API_ROUTE } from '../Config/config';
+
 var Cookies = require('js-cookie');
 
 
@@ -32,13 +34,12 @@ export const deleteAccessToken = ()=>{
 export const validateAccessToken = async()=>{
   let token = getAccessToken();
   if(token){
-    let url = "http://localhost:3000/validateToken";
+    let url = API_ROUTE.VERIFY_TOKEN;
     let loginUser = await fetch(url, {
         method: 'get',
         headers: { 'Content-Type': 'application/json','Authorization':token},
     })
     let result = await loginUser.json();
-    console.log("result====",result);
     if(result.status === 200){
       return result;
     }else{
