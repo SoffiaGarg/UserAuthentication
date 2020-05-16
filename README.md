@@ -5,34 +5,24 @@ Backend and Frontend of User Authentication
 ...............................................................................
 
 Steps to Start Application.
-
-1) Start the Server first , go to ./BcakendApi folder and in cmd execute
+1) This project require mongodb for datastore. Please make sure mongodb is installed locally on default port
+2) Start the Server first , go to ./BackendApi folder and in cmd execute
  npm install
  npm run start
 
 this will automatically start the server on port 3000
 
 
-2) Start the React App - please come outside from the folder Backend api and in the command prompt.
+3) Start the React App - please come outside from the folder Backend api and in the command prompt.
 
 npm install
 npm run start.
 
-this will start the web application on port 3001.
+this will start the web application on port 3002.
 
 
-3) Technologies Used - Express Node Js , React.
-4) Package use - jsonwebtoken , js-cookie
-
-
-/**
-........................................................................
-Things to Take Care
-.........................................................................
-
-1) No Database is used as of now. user data is present isuser-db folder (in backend database folder).
-2) We are not using Env file.
-3) There is no seprate file to manage the error and success Messages and Structure.
+4) Technologies Used - Express Node Js , React.
+5) Package use - jsonwebtoken , js-cookie
 
 
 /**
